@@ -1,9 +1,6 @@
 package com.mibiatchi.rentals.service;
 
-import com.mibiatchi.rentals.entity.Booking;
-import com.mibiatchi.rentals.entity.BookingStatus;
-import com.mibiatchi.rentals.entity.Car;
-import com.mibiatchi.rentals.entity.User;
+import com.mibiatchi.rentals.entity.*;
 import com.mibiatchi.rentals.dto.BookingRequest;
 import com.mibiatchi.rentals.dto.BookingResponse;
 import com.mibiatchi.rentals.mapper.BookingMapper;
@@ -11,6 +8,10 @@ import com.mibiatchi.rentals.repository.BookingRepository;
 import com.mibiatchi.rentals.repository.CarRepository;
 import com.mibiatchi.rentals.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,18 +37,19 @@ public class BookingService {
             throw new IllegalArgumentException("End date must be at least one day after the start date.");
         }
 
-        // 2. Fetch Entities (Throws error if someone sends a fake ID)
+        // 2. Fetch Entities
         Car car = carRepository.findById(request.carId())
                 .orElseThrow(() -> new IllegalArgumentException("Car not found with ID: " + request.carId()));
 
-        if (!car.isAvailable()) {
-            throw new IllegalStateException("This car is currently deactivated by the admin.");
+        // UPDATED: Allow bookings for ACTIVE and RENTED cars, but block broken/sold cars
+        if (car.getStatus() == CarStatus.MAINTENANCE || car.getStatus() == CarStatus.RETIRED_SOLD) {
+            throw new IllegalStateException("This car is currently unavailable or has been retired from the fleet.");
         }
 
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + request.userId()));
 
-        // 3. The Instant Booking Core: Check for Overlaps
+        // 3. The Instant Booking Core: Check for Overlaps (This protects the dates!)
         long overlappingBookings = bookingRepository.countOverlappingBookings(
                 car.getId(), request.startDate(), request.endDate()
         );
@@ -131,6 +133,57 @@ public class BookingService {
         booking.setStartDate(newStart);
         booking.setEndDate(newEnd);
         booking.setTotalPrice(newPrice);
+
+        Booking updatedBooking = bookingRepository.save(booking);
+
+        return bookingMapper.toBookingResponse(updatedBooking);
+    }
+
+    // ==========================================
+    // ADMIN MANAGEMENT METHODS
+    // ==========================================
+
+    @Transactional(readOnly = true)
+    public Page<BookingResponse> getAllBookings(int page, int size) {
+
+        // 1. Create the Pagination Request
+        // We also sort by ID descending so the newest bookings show up first on page 1!
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        // 2. Fetch the specific page from PostgreSQL
+        Page<Booking> bookingPage = bookingRepository.findAll(pageable);
+
+        // 3. Map the Entities to DTOs
+        return bookingPage.map(bookingMapper::toBookingResponse);
+    }
+
+    @Transactional
+    public BookingResponse adminSwapCar(Long bookingId, Long newCarId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
+        if (booking.getStatus() == BookingStatus.CANCELLED || booking.getStatus() == BookingStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot swap cars for a cancelled or completed booking.");
+        }
+
+        Car newCar = carRepository.findById(newCarId)
+                .orElseThrow(() -> new IllegalArgumentException("New car not found"));
+
+        if (newCar.getStatus() == CarStatus.MAINTENANCE || newCar.getStatus() == CarStatus.RETIRED_SOLD) {
+            throw new IllegalStateException("The replacement car is currently unavailable or retired.");
+        }
+
+        // Check if the NEW car is available for the EXISTING booking dates
+        long overlappingBookings = bookingRepository.countOverlappingBookings(
+                newCar.getId(), booking.getStartDate(), booking.getEndDate()
+        );
+
+        if (overlappingBookings > 0) {
+            throw new IllegalStateException("The replacement car is already booked for these dates.");
+        }
+
+        // Perform the swap (Notice we do NOT recalculate the price - it's a free upgrade/swap for the inconvenience!)
+        booking.setCar(newCar);
 
         Booking updatedBooking = bookingRepository.save(booking);
 
