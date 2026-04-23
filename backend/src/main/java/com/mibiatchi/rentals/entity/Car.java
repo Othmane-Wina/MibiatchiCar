@@ -31,8 +31,9 @@ public class Car {
 
     private String imageUrl; // For the Figma 'car pic'
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean isAvailable = true; // Quick toggle for admins to hide a car
+    private CarStatus status = CarStatus.ACTIVE; // Default state for new cars
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<Booking> bookings;

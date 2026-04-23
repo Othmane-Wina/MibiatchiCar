@@ -46,4 +46,14 @@ public class ReviewMapper {
 
         return review;
     }
+
+    // 3. Request + Existing Entity -> Updated Entity (For Modifying an EXISTING Review)
+    public void updateEntityFromRequest(ReviewRequest request, Review review) {
+        if (request == null || review == null) {
+            return;
+        }
+
+        review.setRating(request.rating());
+        review.setComment(request.comment());
+    }
 }
