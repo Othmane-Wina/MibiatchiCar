@@ -8,11 +8,21 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
+  sql:
+    init:
+      # Tell Spring to ALWAYS run the initialization scripts (data.sql)
+      mode: always
+
   jpa:
+    # Tell Spring to wait for Hibernate to create tables before running data.sql
+    defer-datasource-initialization: true
+
     hibernate:
       # 'update' tells Spring to automatically create/modify tables based on your Entities!
-      ddl-auto: update
+      ddl-auto: create
+
     show-sql: true # Prints the SQL in your console so you can see what Spring is doing
+
     properties:
       hibernate:
         format_sql: true

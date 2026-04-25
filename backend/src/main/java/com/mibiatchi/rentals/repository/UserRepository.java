@@ -7,4 +7,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     // Crucial for the Spring Security login we will build later
     Optional<User> findByEmail(String email);
+
+    // Prevents duplicate accounts during registration
+    boolean existsByEmail(String email);
 }
