@@ -15,6 +15,10 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     // To only show cars that admins have made available
     List<Car> findByStatus(CarStatus status);
 
+    // Spring Boot automatically translates this into:
+    // SELECT * FROM cars WHERE status NOT IN (?, ?)
+    List<Car> findByStatusNotIn(List<CarStatus> statuses);
+
     @Modifying
     @Query("UPDATE Car c SET c.status = 'ACTIVE' WHERE c.status = 'RENTED' " +
             "AND NOT EXISTS (SELECT 1 FROM Booking b WHERE b.car = c " +

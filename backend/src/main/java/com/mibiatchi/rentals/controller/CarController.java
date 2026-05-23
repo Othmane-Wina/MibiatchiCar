@@ -24,7 +24,12 @@ public class CarController {
     // PUBLIC ENDPOINTS (No login required)
     // ==========================================
 
-    @GetMapping
+    @GetMapping("/all")
+    public ResponseEntity<List<CarResponse>> getAllCars() {
+        return ResponseEntity.ok(carService.getAllCars());
+    }
+
+    @GetMapping("/all/available")
     public ResponseEntity<List<CarResponse>> getAllAvailableCars() {
         // Powers the main catalog on the Next.js homepage
         List<CarResponse> responses = carService.getAllAvailableCars();

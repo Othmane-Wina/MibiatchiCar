@@ -11,9 +11,9 @@ INSERT INTO users (id, first_name, last_name, email, password, role) VALUES
 -- ==========================================
 -- Notice we use the exact Enum string values we defined in CarStatus
 INSERT INTO cars (id, make, model, production_year, daily_rate, status, image_url) VALUES
-                                                                                       (1, 'Dacia', 'Logan', 2023, 30.00, 'ACTIVE', 'https:/s/logan.jpg/example.com/image'),
+                                                                                       (1, 'Dacia', 'Logan', 2023, 30.00, 'AVAILABLE', 'https:/s/logan.jpg/example.com/image'),
                                                                                        (2, 'Renault', 'Clio', 2022, 35.00, 'RENTED', 'https://example.com/images/clio.jpg'),
-                                                                                       (3, 'Hyundai', 'Tucson', 2024, 75.00, 'ACTIVE', 'https://example.com/images/tucson.jpg'),
+                                                                                       (3, 'Hyundai', 'Tucson', 2024, 75.00, 'AVAILABLE', 'https://example.com/images/tucson.jpg'),
                                                                                        (4, 'Range Rover', 'Evoque', 2021, 150.00, 'MAINTENANCE', 'https://example.com/images/evoque.jpg'),
                                                                                        (5, 'Peugeot', '208', 2019, 25.00, 'RETIRED_SOLD', 'https://example.com/images/208.jpg');
 

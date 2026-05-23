@@ -1,5 +1,7 @@
 package com.mibiatchi.rentals.dto;
 
+import com.mibiatchi.rentals.entity.CarStatus;
+
 import java.math.BigDecimal;
 
 public record CarResponse(
@@ -8,5 +10,6 @@ public record CarResponse(
         String model,
         Integer productionYear,
         BigDecimal dailyRate,
-        String imageUrl
+        String imageUrl,
+        CarStatus status
 ) {}

@@ -25,8 +25,22 @@ public class CarService {
     // ==========================================
 
     @Transactional(readOnly = true)
+    public List<CarResponse> getAllCars() {
+        // Define the statuses we NEVER want to show to the customer
+        List<CarStatus> hiddenStatuses = List.of(
+                CarStatus.MAINTENANCE,
+                CarStatus.RETIRED_SOLD
+        );
+
+        return carRepository.findByStatusNotIn(hiddenStatuses)
+                .stream()
+                .map(carMapper::toCarResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<CarResponse> getAllAvailableCars() {
-        return carRepository.findByStatus(CarStatus.ACTIVE)
+        return carRepository.findByStatus(CarStatus.AVAILABLE)
                 .stream()
                 .map(carMapper::toCarResponse)
                 .collect(Collectors.toList());
@@ -44,7 +58,7 @@ public class CarService {
     public List<CarResponse> searchCars(String keyword) {
         return carRepository.findByMakeContainingIgnoreCaseOrModelContainingIgnoreCase(keyword, keyword)
                 .stream()
-                .filter(car -> car.getStatus() == CarStatus.ACTIVE) // Business Rule: Only show active cars in search
+                .filter(car -> car.getStatus() == CarStatus.AVAILABLE) // Business Rule: Only show active cars in search
                 .map(carMapper::toCarResponse)
                 .collect(Collectors.toList());
     }

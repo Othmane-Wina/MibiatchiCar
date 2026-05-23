@@ -33,7 +33,7 @@ public class Car {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CarStatus status = CarStatus.ACTIVE; // Default state for new cars
+    private CarStatus status = CarStatus.AVAILABLE; // Default state for new cars
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<Booking> bookings;

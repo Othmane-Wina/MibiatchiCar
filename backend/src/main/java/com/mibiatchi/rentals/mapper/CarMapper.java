@@ -20,7 +20,8 @@ public class CarMapper {
                 car.getModel(),
                 car.getProductionYear(),
                 car.getDailyRate(),
-                car.getImageUrl()
+                car.getImageUrl(),
+                car.getStatus()
         );
     }
 
@@ -36,7 +37,7 @@ public class CarMapper {
         car.setProductionYear(request.productionYear());
         car.setDailyRate(request.dailyRate());
         car.setImageUrl(request.imageUrl());
-        car.setStatus(CarStatus.ACTIVE);
+        car.setStatus(CarStatus.AVAILABLE);
 
         return car;
     }
