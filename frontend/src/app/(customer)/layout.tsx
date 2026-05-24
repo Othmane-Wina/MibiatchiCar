@@ -1,0 +1,15 @@
+import React from 'react';
+import Navbar from '../../components/common/NavBar';
+import Footer from '../../components/common/Footer';
+
+export default function CustomerLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+}
